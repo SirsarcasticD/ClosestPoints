@@ -3,12 +3,14 @@ package stats;
 import java.lang.Math;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
 /* A class that takes in a value n, 2D array of size n representing points, a value k and a center point. The value k is how many closest points you wish to find
-   returns a Sorted list of size k in the case of a LinkedList and of size n in the case of bubbleSort.
-*/
+   returns a Sorted list of size k in the case of a LinkedList and of size n in the case of bubbleSort. */
 
-public class closestPoints {														// We are expecting 3 arguments. A 2D array of n points, an integer k and a int[2] centerPoint
+public class closestPoints extends JPanel{											// We are expecting 3 arguments. A 2D array of n points, an integer k and a int[2] centerPoint
 
 	int[][] givenPoints;															// 2D array to become points passed to constructor
 	
@@ -20,22 +22,63 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 	
 	LinkedList<Point> linkedSortedPoints = new LinkedList<Point>();					// LinkedList of sorted Points. We will insert points (object) one at a time at an index according to their distance
 	
-	public closestPoints(int n, int[][] givenPoints, int k, int[] centerPoint) {	// Constructor that takes in the 4 arguments
+	
+	/* Constructor that takes in the 4 arguments. Initializes the points and
+	   calculates the distance of each point to the centerPoint. */
+	public closestPoints(int n, int[][] givenPoints, int k, int[] centerPoint) {
+		
+		assert (k>givenPoints.length): "k must be less than the number of points";
 		
 		points = new Point[n];																// Points (object) array initialized to size n												
-
-		this.givenPoints = new int[n][2];													// 2D array initialized to size n
 		
+		this.givenPoints = new int[n][2];													// 2D array initialized to size n
 		this.givenPoints = givenPoints;														// Make global variable givenPoints equal to argument passed
 		this.k = k;																			// Make global variable k	   		equal to argument passed
 		this.centerPoint = centerPoint;														// Make global variable centerPoint equal to argument passed
 		
-		if(k > givenPoints.length) {														// exit if k > n
-			System.out.println("k must be less than the number of points");
-			System.exit(0);
-		}		
+		initializePoints();
+		
+		calculateDistances();
 	}
 	
+	public void initializePoints() {
+		
+		for(int i =0; i<points.length; i++) {												// Initialize points[] with points. Data values are initialized to 0 by Point constructor
+			Point temp = new Point();
+			points[i] = temp;
+		}
+
+		for(int i =0; i<givenPoints.length; i++) {											// Update x and y values of Point object in points[]
+			
+			points[i].x = givenPoints[i][0];												// set Point.x = givenPoint.x
+			points[i].y = givenPoints[i][1];												// set Point.y = givenPoint.y 
+		}
+	}
+	
+	public void calculateDistances() {
+		
+		int x;
+		int y;
+		double distance;
+		
+		for(int i =0; i<givenPoints.length; i++) {												// For every given point
+			
+			x = givenPoints[i][0];
+			y = givenPoints[i][1];
+			
+			x = x - centerPoint[0];																// Find x from centerPoint to givenPoint
+			y = y - centerPoint[1];																// Find y from centerPoint to givenPoint
+			x = x * x;																			// Square x 
+			y = y * y;																			// Square y
+																								//  ** We don't need to get abs value because square will guarantee us a positive Real Number
+
+			distance = Math.sqrt(x + y);														// Calculate: distance = Sqrt(x^2 + y^2)
+			
+			points[i].distance = distance;	// Find the distance and set point distance
+		}
+	
+	}
+
 	public void quickSort(Point[] pArray) { // NOT FINISHED
 		
 		Point temp = new Point();
@@ -71,17 +114,10 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 			}
 		}	
 	}
-	
+		
 	public void bubbleSort() {
-
-		initializePoints();
 		
 		Point temp = new Point();
-		
-		for(int i =0; i<givenPoints.length; i++) {											// For every given point
-			
-			setPointDistance((double) givenPoints[i][0], (double) givenPoints[i][1], i);	// Find the distance and set point distance
-		}
 		
 		for(int i = 0; i<givenPoints.length -1; i++) {
 			
@@ -105,8 +141,6 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 		
 		for(int i =0; i<givenPoints.length; i++) {											// For every given point
 			
-			setPointDistance((double) givenPoints[i][0], (double) givenPoints[i][1], i);		// Find the distance and set point distance
-			
 			insertPointDLL(points[i]);														// Call insertPointDLL method to place into linkedSortedPoints DLL
 		}
 		printLinkedSortedPoints();																		// Print points
@@ -119,11 +153,6 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 		double minDistance;
 		int index = 0;
 		Point temp = new Point();
-		
-		for(int i =0; i<givenPoints.length; i++) {											// For every given point
-			
-			setPointDistance((double) givenPoints[i][0], (double) givenPoints[i][1], i);	// Find the distance and set point distance
-		}	
 		
 		for(int i =0; i<points.length; i++) {
 			
@@ -144,37 +173,6 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 		
 	}
 	
-	//Helper Methods
-	public void initializePoints() {
-		
-		for(int i =0; i<points.length; i++) {												// Initialize points[] with points. Data values are initialized to 0 by Point constructor
-			Point temp = new Point();
-			points[i] = temp;
-		}
-
-		for(int i =0; i<givenPoints.length; i++) {											// Update x and y values of Point object in points[]
-			
-			points[i].x = givenPoints[i][0];												// set Point.x = givenPoint.x
-			points[i].y = givenPoints[i][1];												// set Point.y = givenPoint.y 
-		}
-	}
-
-	public void setPointDistance(double x, double y, int i) {
-	
-		
-		double distance;
-		
-		x = x - centerPoint[0];																// Find x from centerPoint to givenPoint
-		y = y - centerPoint[1];																// Find y from centerPoint to givenPoint
-		x = x * x;																			// Square x 
-		y = y * y;																			// Square y
-																							//  ** We don't need to get abs value because square will guarantee us a positive Real Number
-
-		distance = Math.sqrt(x + y);														// Calculate: distance = Sqrt(x^2 + y^2)
-		
-		points[i].distance = distance;
-	}
-	
 	public void insertPointDLL(Point p){
 	
 	
@@ -192,21 +190,24 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 				break;																
 			}
 			
-			if(p.distance < linkedSortedPoints.get(i).distance) {									// if p distance is less than currentNode distance
+			if(p.distance < linkedSortedPoints.get(i).distance) {								// if p distance is less than currentNode distance
 				
-				linkedSortedPoints.add(i, p);														// p will go "behind" currentNode and currentNode will now be at next index			
+				linkedSortedPoints.add(i, p);													// p will go "behind" currentNode and currentNode will now be at next index			
 				break;
 			}
 		}
 		keepListSizeK();
 	}
 	
-	public void keepListSizeK() {													// Most important method. Keeps linkedSortedPoints list size of k. This reduces the number of comparisons we have to do dramatically if k << n 
+	/* Keeps linkedSortedPoints list size of k by removing last element when size > k.
+	   This dramatically reduces the number of comparisons we have to do if k << n. */
+	public void keepListSizeK() {													 
 		
 		if(linkedSortedPoints.size() > k) {											// If the list is > k 
 			linkedSortedPoints.removeLast();										// Remove the largest element in the list (last element)
 		}
 	}
+
 	
 	public void printLinkedSortedPoints() {
 
@@ -224,8 +225,6 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 			}
 		}
 	}
-	
-	
 	public void printBubbleSortedPoints() {
 
 		System.out.print("The closest " + k + " point(s) to " + "(" + centerPoint[0] + "," + centerPoint[1] + ") " + "in increasing order of distance are: ");
@@ -321,27 +320,19 @@ public class closestPoints {														// We are expecting 3 arguments. A 2D 
 			
 			switch(dataStructure) {
 			
-			case 1:
-				x.linkedListSort();
+			case 1: x.linkedListSort();
 				break;
-			case 2:
-				x.bubbleSort();
+			case 2: x.bubbleSort();
 				break;
-			case 3:
-				x.selectionSort();
+			case 3: x.selectionSort();
 				break;
-			case 4:
-				if((double) ((double) k/ (double) n) < 0.05) {
+			case 4: if( ( (double) k/ (double) n) < 0.05) {
 				x.linkedListSort();
 				}else{
 				x.selectionSort();
 				}
 				break;
 			}
-			
-			System.out.println();
-			System.out.println((double) ((double) k/ (double) n));
-			System.out.println();
 			
 			double stopTime = System.nanoTime();											// Record current time in nanoseconds
 		
